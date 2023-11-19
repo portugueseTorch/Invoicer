@@ -3,9 +3,9 @@
 
 **Invoicer** is a simple application to ingest a digital invoice (currently only compatible with Pingo Doce) displaying a simple Frontend to allow for an exact, item-by-item expense sharing.
 
-The project is currently under development and the idea is to eventually have the expenses stored in a databse to allow for a running tally, allowing for the creation of Groups.
+The project is currently under development and the idea is to eventually have the expenses stored in a databse to allow for a running tally, creation of Groups, etc.
 
-The next step in the development process is to allow users to upload a picture of the paper invoice instead of the digital version, and then use OCR to extract the relevant info.
+The next step in the development process is to enable users to upload a picture of the paper invoice instead of the digital version, and then use OCR on the backend to extract the relevant info.
 
 
 This project is being done in collaboration with [Miguel Bandeira](https://github.com/MiguelBandeira21).
