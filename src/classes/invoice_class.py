@@ -37,14 +37,16 @@ class Invoice:
 
 	def __parse_item__(self, line: str) -> (str, float):
 		start = line.find('%') + 1
-		split = line.split(' ')
 
-		# Try to convert last item to float to check if its a cost
+		# Try to convert last item to float to check if it's a cost
 		try:
-			cost = float(split[len(split) - 1].replace(',', '.'))
+			cost = None
+			for i in range(len(line) - 1, 0, -1):
+				if line[i] == ' ':
+					cost = float(line[i + 1:].replace(',', '.'))
+					break
 			end = line.find("  ", start)
 			return (line[start:end].strip(), cost)
-
 		except:
 			return (line[start:].strip(), None)
 
@@ -75,11 +77,20 @@ class Invoice:
 					current_token = ItemToken(None)
 					current_token.name, current_token.cost = self.__parse_item__(lines[i])
 				else:
-					split = lines[i].split(' ')
 					if (lines[i][0].isdigit()):
-						current_token.cost = float(split[len(split) - 1].replace(',', '.'))
+						cost = 0
+						for j in range(len(lines[i]) - 1, 0, -1):
+							if lines[i][j] == ' ':
+								cost = float(lines[i][j + 1:].replace(',', '.'))
+								break
+						current_token.cost = cost
 					else:
-						current_token.discount = - float(split[len(split) - 1][1:-1].replace(',', '.'))
+						discount = 0
+						for j in range(len(lines[i]) - 1, 0, -1):
+							if lines[i][j] == '(':
+								discount = float(lines[i][j + 1:-1].replace(',', '.'))
+								break
+						current_token.discount = -discount
 
 		# for token in tokens:
 		# 	token.display()
