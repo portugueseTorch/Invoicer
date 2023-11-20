@@ -60,26 +60,30 @@ class Invoice:
 		lines.append("")
 
 		current_token = None
-		for i in range(len(lines)):
+		i = 0
+		while i < len(lines):
 			lines[i] = lines[i].strip()
-			if i == len(lines) - 1 and current_token != None:
-				tokens.append(current_token)
+			if i == len(lines) - 1:
+				if current_token != None:
+					tokens.append(current_token)
 				break
 
 			if lines[i].lower() in self.categories:
 
 				if current_token != None:
 					tokens.append(current_token)
+					
 				if lines[i].lower() == "descontos extra":
-					current_token = ItemToken("DESCONTOS EXTRA")
+					current_token = ItemToken("DISCOUNT", "DESCONTOS EXTRA")
 					current_token.cost = 0
 					i+=1
 					for j in range(len(lines[i]) - 1, 0, -1):
 						if lines[i][j] == '(':
 							discount = float(lines[i][j + 1:-1].replace(',', '.'))
 							break
-						current_token.discount = -discount
+					current_token.discount = -discount
 					tokens.append(current_token)
+					current_token = None
 					
 				else:
 					tokens.append(CategoryToken(lines[i]))
@@ -107,16 +111,20 @@ class Invoice:
 								discount = float(lines[i][j + 1:-1].replace(',', '.'))
 								break
 						current_token.discount = -discount
+			i+=1
 		return tokens
 
 
 	def __build_dataframe__(self, tokens: list) -> pd.DataFrame:
 		data = {'Category': [], 'Item': [], 'Cost': [], 'Discount': []}
 		current_category = ""
-		for token in tokens:
+		for token in tokens:		
 			if token.type == 'CATEGORY_TOKEN':
 				current_category = token.name
 				continue
+			if token.type == 'DESCONTOS EXTRA':
+				current_category = token.type					
+
 			data['Category'].append(current_category)
 			data['Item'].append(token.name)
 			data['Cost'].append(token.cost)

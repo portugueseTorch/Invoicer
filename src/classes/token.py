@@ -38,6 +38,7 @@ class ItemToken(Token):
 	def __init__(
 		self,
 		name: str,
+		type: str = 'ITEM_TOKEN',
 		cost = 0,
 		discount = 0
 	) -> None:
@@ -49,7 +50,7 @@ class ItemToken(Token):
 		cost: Cost of the item
 		discount: discount of the itme as negative number
 		'''
-		super().__init__(name, 'ITEM_TOKEN')
+		super().__init__(name, type)
 		self.cost = cost
 		self.discount = discount
 
