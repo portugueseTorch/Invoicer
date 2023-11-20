@@ -1,5 +1,5 @@
 from pdfminer.high_level import extract_text
-from pypdf import PdfReader
+from PyPDF2 import PdfReader
 import pandas as pd
 from classes.token import Token, CategoryToken, ItemToken
 
@@ -12,6 +12,7 @@ class Invoice:
 	'''
 	categories = [
 		"mercearia + pet food", "talho", "frutas e vegetais",
+		"padaria/pastelaria", "descontos extra",
 		"congelados", "produtos lacteos", "queijos",
 		"deterg. e prod. limpeza", "produtos pessoais",
 		"charcutaria", "ovos", "bazar", "bebidas"
@@ -33,7 +34,8 @@ class Invoice:
 		Category, Item, Cost, and Discount
 		'''
 		tokens = self.__tokenize__()
-		return tokens
+		dataframe = self.__build_dataframe__(tokens)
+		return dataframe
 
 	def __parse_item__(self, line: str) -> (str, float):
 		start = line.find('%') + 1
@@ -65,10 +67,24 @@ class Invoice:
 				break
 
 			if lines[i].lower() in self.categories:
+
 				if current_token != None:
 					tokens.append(current_token)
-				tokens.append(CategoryToken(lines[i]))
-				current_token = None
+				if lines[i].lower() == "descontos extra":
+					current_token = ItemToken("DESCONTOS EXTRA")
+					current_token.cost = 0
+					i+=1
+					for j in range(len(lines[i]) - 1, 0, -1):
+						if lines[i][j] == '(':
+							discount = float(lines[i][j + 1:-1].replace(',', '.'))
+							break
+						current_token.discount = -discount
+					tokens.append(current_token)
+					
+				else:
+					tokens.append(CategoryToken(lines[i]))
+					current_token = None
+				
 			else:
 				# End condition for a Token
 				if lines[i][0].isalpha() and lines[i][len(lines[i]) - 1] != ')':
@@ -91,10 +107,10 @@ class Invoice:
 								discount = float(lines[i][j + 1:-1].replace(',', '.'))
 								break
 						current_token.discount = -discount
+		return tokens
 
-		# for token in tokens:
-		# 	token.display()
 
+	def __build_dataframe__(self, tokens: list) -> pd.DataFrame:
 		data = {'Category': [], 'Item': [], 'Cost': [], 'Discount': []}
 		current_category = ""
 		for token in tokens:
